@@ -1,4 +1,6 @@
-# tsoha-sovellus
+# foorumi-sovellus
+
+sovelluksen tilanne: Valitettavasti en ole kerennyt edetä sovelluksen teossa juuri yhtään. Tämä välipalautus jää nyt hyvin vajaaksi.
 
 kuvaus: Annetuista esimerkeistä keskustelusovellus.
 
