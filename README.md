@@ -4,7 +4,9 @@
 Sovelluksen saa käyttöön [Herokussa](https://tsoha-chatforum.herokuapp.com/).
 
 ## Sovelluksen tilanne
-Sovellukseen voi tällä hetkellä luoda käyttäjätunnuksen, kirjautua sisään sekä kirjautua ulos. Muuten sovellus on vielä hyvin keskeneräinen
+Sovellukseen voi tällä hetkellä luoda käyttäjätunnuksen, kirjautua sisään sekä kirjautua ulos. 
+Lisäksi etusivulla näkee luodut foorumit, sekä kuinka monta ketjua ja viestiä niissä on.
+Muuten sovellus on vielä hyvin keskeneräinen
 
 ## Kuvaus
 Annetuista esimerkeistä keskustelusovellus.
