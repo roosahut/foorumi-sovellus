@@ -3,7 +3,9 @@
 {% if session.user_id %}
 Logged in as <b>{{ session.user_name }}</b>
 <p>
-<a href="/logout">Log out</a>
+<form action="/logout" method="post">
+<input type="submit" value="Logout">
+</form>
 {% else %}
 Not logged in
 <p>
