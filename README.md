@@ -1,8 +1,13 @@
-# foorumi-sovellus
+# Foorumi-sovellus
 
-sovelluksen tilanne: Valitettavasti en ole kerennyt edetä sovelluksen teossa juuri yhtään. Tämä välipalautus jää nyt hyvin vajaaksi.
+## Sovellus käyttöön
+Sovelluksen saa käyttöön [Herokussa](https://tsoha-chatforum.herokuapp.com/).
 
-kuvaus: Annetuista esimerkeistä keskustelusovellus.
+## Sovelluksen tilanne
+Sovellukseen voi tällä hetkellä luoda käyttäjätunnuksen, kirjautua sisään sekä kirjautua ulos. Muuten sovellus on vielä hyvin keskeneräinen
+
+## Kuvaus
+Annetuista esimerkeistä keskustelusovellus.
 
 Sovelluksessa näkyy keskustelualueita, joista jokaisella on tietty aihe. Alueilla on keskusteluketjuja, jotka muodostuvat viesteistä. Jokainen käyttäjä on peruskäyttäjä tai ylläpitäjä.
 
