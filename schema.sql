@@ -4,3 +4,24 @@ CREATE TABLE users (
     password TEXT,
     role INTEGER
 );
+
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    writer_id INTEGER REFERENCES users,
+    chain_id INTEGER REFERENCES chains,
+    message TEXT
+    sent_at TIMESTAMP
+);
+
+CREATE TABLE chains (
+    id SERIAL PRIMARY KEY,
+    creator_id INTEGER REFERENCES users,
+    forum_id INTEGER REFERENCES forums,
+    headline TEXT
+);
+
+CREATE TABLE forums (
+    id SERIAL PRIMARY KEY,
+    creator_id INTEGER REFERENCES users,
+    name TEXT
+);
