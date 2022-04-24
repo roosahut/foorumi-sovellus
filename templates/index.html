@@ -3,6 +3,10 @@
 {% if session.user_id %}
 Logged in as <b>{{ session.user_name }}</b>
 <p>
+{% if session.user_role == 2 %}
+You are an admin
+{% endif %}
+<p>
 <form action="/logout" method="post">
 <input type="submit" value="Logout">
 </form>
@@ -12,3 +16,15 @@ Not logged in
 <a href="/login">Log in</a>
 <a href="/register">Create an account</a>
 {% endif %}
+<p>
+<h2>Forums</h2>
+<ul>
+{% for forum in forums %}
+{% for count in counts %}
+<li>{{forum[1]}}
+<p>
+Messages: {{count[0]}}
+Chains: {{count[1]}}</li>
+{% endfor %}
+{% endfor %}
+</ul>

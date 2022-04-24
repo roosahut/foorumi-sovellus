@@ -15,7 +15,7 @@ def login(username, password):
             session['user_id'] = user[0]
             session['user_role'] = user[1]
             session['user_name'] = user[3]
-            session['csrf_token'] = os.random(16).hex()
+            session['csrf_token'] = os.urandom(16).hex()
             return True
 
 

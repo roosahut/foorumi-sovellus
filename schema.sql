@@ -5,12 +5,10 @@ CREATE TABLE users (
     role INTEGER
 );
 
-CREATE TABLE messages (
+CREATE TABLE forums (
     id SERIAL PRIMARY KEY,
-    writer_id INTEGER REFERENCES users,
-    chain_id INTEGER REFERENCES chains,
-    message TEXT
-    sent_at TIMESTAMP
+    creator_id INTEGER REFERENCES users,
+    name TEXT
 );
 
 CREATE TABLE chains (
@@ -20,8 +18,10 @@ CREATE TABLE chains (
     headline TEXT
 );
 
-CREATE TABLE forums (
+CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
-    creator_id INTEGER REFERENCES users,
-    name TEXT
+    writer_id INTEGER REFERENCES users,
+    chain_id INTEGER REFERENCES chains,
+    message TEXT
+    sent_at TIMESTAMPTZ DEFAULT Now()
 );
