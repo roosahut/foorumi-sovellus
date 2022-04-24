@@ -1,5 +1,6 @@
+import os
 from db import db
-from flask import session, abort
+from flask import session, abort, request
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -14,6 +15,7 @@ def login(username, password):
             session['user_id'] = user[0]
             session['user_role'] = user[1]
             session['user_name'] = user[3]
+            session['csrf_token'] = os.random(16).hex()
             return True
 
 
@@ -41,4 +43,9 @@ def logout():
 
 def require_role(role):
     if role != session.get('user_role', 0):
+        abort(403)
+
+
+def check_csrf():
+    if session['csrf_token'] != request.form['crsf_token']:
         abort(403)
