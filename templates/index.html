@@ -21,7 +21,7 @@ Not logged in
 <ul>
 {% for forum in forums %}
 {% for count in counts %}
-<li>{{forum[1]}}
+<li><a href="/forum/{{ forum[0] }}">{{ forum[1]}}</a>
 <p>
 Messages: {{count[0]}}
 Chains: {{count[1]}}</li>

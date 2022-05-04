@@ -1,0 +1,10 @@
+<h2>{{ chain_info[0] }}</h2>
+created by {{ chain_info[1] }}
+<p>
+<p>
+{% for message in messages %}
+{{ message[0] }}
+<p>
+sent by {{ message[1] }} at {{ message[2] }}
+<p>
+{% endfor %}

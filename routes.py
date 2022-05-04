@@ -39,7 +39,7 @@ def reqister():
         if role not in ['1', '2']:
             return render_template('error.html', message='Unknown user')
 
-        if users.register(username, password1, role) is False:
+        if not users.register(username, password1, role):
             return render_template('error.html', message='The registration was unsuccesful, try a different username')
 
         return redirect('/')
@@ -64,6 +64,18 @@ def logout():
     return redirect('/')
 
 
-@app.route('/forums/<int:forum_id>')
+@app.route('/forum/<int:forum_id>')
 def show_forum(forum_id):
-    pass
+    chains = fr.get_chains_in_forum(forum_id)
+    name = fr.get_forum_name(forum_id)[0]
+    messages = []
+    for chain in chains:
+        message = fr.get_message_count_in_chain(chain[0])
+        messages.append(message)
+    return render_template('forum.html', id=forum_id, chains=chains, name=name, messages=messages)
+
+@app.route('/chain/<int:chain_id>')
+def show_chain(chain_id):
+    messages = fr.get_messages_in_chain(chain_id)
+    chain_info = fr.get_chain_info(chain_id)[0]
+    return render_template('chain.html', id=chain_id, messages=messages, chain_info=chain_info)

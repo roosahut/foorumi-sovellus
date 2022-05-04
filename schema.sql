@@ -22,6 +22,6 @@ CREATE TABLE messages (
     id SERIAL PRIMARY KEY,
     writer_id INTEGER REFERENCES users,
     chain_id INTEGER REFERENCES chains,
-    message TEXT
+    message TEXT,
     sent_at TIMESTAMPTZ DEFAULT Now()
 );
