@@ -75,6 +75,7 @@ def show_forum(forum_id):
         messages.append(message)
     return render_template('forum.html', id=forum_id, chains=chains, name=name, messages=messages)
 
+
 @app.route('/forum/<int:forum_id>/<int:chain_id>')
 def show_chain(forum_id, chain_id):
     messages = fr.get_messages_in_chain(chain_id)
@@ -102,8 +103,9 @@ def add_new_chain(forum_id):
         if len(message) > 10000:
             return render_template("error.html", message="The message is too long")
 # tee tälle jotain et se ei ota sitä kahesti
-        chain_id = fr.add_new_chain(headline, message, users.user_id(), forum_id)
-        #if not fr.add_new_chain(headline, message, users.user_id(), forum_id):
+        chain_id = fr.add_new_chain(
+            headline, message, users.user_id(), forum_id)
+        # if not fr.add_new_chain(headline, message, users.user_id(), forum_id):
         #    return render_template("error.html", message="Error in adding the chain")
 
         return redirect(f'/forum/{forum_id}/{chain_id}')
@@ -118,10 +120,10 @@ def new_message():
 
     message = request.form['message']
     if message == "":
-            return render_template("error.html", message="You have to write a message to start the chain")
-        if len(message) > 10000:
-            return render_template("error.html", message="The message is too long")
-            
+        return render_template("error.html", message="You have to write a message to start the chain")
+    if len(message) > 10000:
+        return render_template("error.html", message="The message is too long")
+
     fr.add_new_message(message, writer_id, chain_id)
 
     forum_id = request.form['forum_id']
