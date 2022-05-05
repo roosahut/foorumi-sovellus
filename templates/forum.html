@@ -3,21 +3,22 @@
 {% if session.user_id %}
 Logged in as <b>{{ session.user_name }}</b>
 <p>
-Tähän mahis tehä uus heh
-{% else %}
-Not logged in
+Create a new chain here!
 <p>
-<a href="/login">Log in</a>
-<a href="/register">Create an account</a>
+<a href="/forum/{{ id }}/new_chain">New chain</a>
+<p>
+{% else %}
+You have to be logged in to create a new chain
+<p>
+    <a href="/login">Log in here</a>
+    <a href="/register">Create an account here</a>
 {% endif %}
 <p>
 <p>
 Chains in {{ name }} - forum
 <p>
 {% for chain in chains %}
-{% for message in messages %}
-<li><a href="/chain/{{ chain[0] }}">{{ chain[1] }}</a>
+<li><a href="/forum/{{ id }}/{{ chain[0] }}">{{ chain[1] }}</a>
 <p>
-Messages: {{ message }}</li>
-{% endfor %}
+</li>
 {% endfor %}

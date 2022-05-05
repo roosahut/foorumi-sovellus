@@ -39,3 +39,21 @@ def get_messages_in_chain(chain_id):
 def get_chain_info(chain_id):
     sql = 'SELECT c.headline, u.username FROM chains c, users u WHERE c.id = :chain_id AND u.id = c.creator_id'
     return db.session.execute(sql, {'chain_id': chain_id}).fetchall()
+
+def add_new_chain(headline, message, creator_id, forum_id):
+    try:
+        sql = 'INSERT INTO chains (headline, creator_id, forum_id) VALUES (:headline, :creator_id, :forum_id) RETURNING id'
+        chain_id = db.session.execute(sql, {'headline': headline, 'creator_id': creator_id, 'forum_id': forum_id}).fetchone()[0]
+        add_new_message(message, creator_id, chain_id)
+        db.session.commit()
+        return chain_id
+    except:
+        return False
+
+def add_new_message(message, writer_id, chain_id):
+    try:
+        sql = 'INSERT INTO messages (message, writer_id, chain_id) VALUES (:message, :writer_id, :chain_id)'
+        db.session.execute(sql, {'message': message, 'writer_id': writer_id, 'chain_id': chain_id})
+        db.session.commit()
+    except:
+        return False

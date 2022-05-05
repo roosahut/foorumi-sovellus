@@ -1,0 +1,10 @@
+<h2>Create a new chain</h2>
+
+<form action="/forum/{{ forum_id }}/new_chain" method="post">
+<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+Headline: <input type="text" name="headline">
+<p>
+Message: <input type="text" name="message">
+<p>
+<input type="submit" value="Send">
+</form>
