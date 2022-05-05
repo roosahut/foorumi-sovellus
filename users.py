@@ -47,5 +47,5 @@ def require_role(role):
 
 
 def check_csrf():
-    if session['csrf_token'] != request.form['crsf_token']:
+    if session['csrf_token'] != request.form['csrf_token']:
         abort(403)

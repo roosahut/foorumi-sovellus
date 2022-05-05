@@ -8,3 +8,15 @@ created by {{ chain_info[1] }}
 sent by {{ message[1] }} at {{ message[2] }}
 <p>
 {% endfor %}
+
+{% if session.user_id %}
+<h3>Write a new message</h3>
+<form action="/new_message" method="post">
+<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+<input type="hidden" name="chain_id" value="{{ id }}">
+<input type="hidden" name="forum_id" value="{{ forum_id }}">
+<p>
+<textarea name="message" rows="4" cols="60" value="message"></textarea>
+<p><input type="submit" value="Send message">
+</form>
+{% endif %}
