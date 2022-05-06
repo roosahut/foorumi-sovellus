@@ -1,10 +1,17 @@
 <h1>Chat-forum</h1>
-
 {% if session.user_id %}
 Logged in as <b>{{ session.user_name }}</b>
 <p>
 {% if session.user_role == 2 %}
-You are an admin
+You are an admin<p>
+Create a new forum here
+</p>
+<form action="/new_forum" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+Name of the forum: <input type="text" name="name">
+<p>
+    <input type="submit" value="Create a new forum">
+</form>
 {% endif %}
 <p>
 <form action="/logout" method="post">
@@ -18,13 +25,11 @@ Not logged in
 {% endif %}
 <p>
 <h2>Forums</h2>
+{{ forums }}
 <ul>
-{% for forum in forums %}
-{% for count in counts %}
-<li><a href="/forum/{{ forum[0] }}">{{ forum[1]}}</a>
-<p>
-Messages: {{count[0]}}
-Chains: {{count[1]}}</li>
-{% endfor %}
-{% endfor %}
-</ul>
+    {% for forum in forums %}
+    <li><a href="/forum/{{ forum[0] }}">{{ forum[1]}}</a>
+    <p> chains: {{ forum[2] }} messages: {{ forum[3] }} last activity: {{ forum[4] }}
+    </li>
+    {% endfor %}
+    </ul>

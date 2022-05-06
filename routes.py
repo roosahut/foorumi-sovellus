@@ -7,14 +7,8 @@ import forums as fr
 
 @app.route('/')
 def index():
-    forums = fr.get_all_forums()
-    counts = []
-    for i in forums:
-        messages = fr.get_message_count_in_forum(i[0])
-        chains = fr.get_chain_count_in_forum(i[0])
-        add = (messages, chains)
-        counts.append(add)
-    return render_template('index.html', forums=forums, counts=counts)
+    forums = fr.get_forums_info()
+    return render_template('index.html', forums=forums)
 
 
 @app.route('/register', methods=['get', 'post'])
@@ -67,19 +61,15 @@ def logout():
 
 @app.route('/forum/<int:forum_id>')
 def show_forum(forum_id):
-    chains = fr.get_chains_in_forum(forum_id)
+    chains = fr.get_chains_info_in_forum(forum_id)
     name = fr.get_forum_name(forum_id)[0]
-    messages = []
-    for chain in chains:
-        message = fr.get_message_count_in_chain(chain[0])
-        messages.append(message)
-    return render_template('forum.html', id=forum_id, chains=chains, name=name, messages=messages)
+    return render_template('forum.html', id=forum_id, chains=chains, name=name)
 
 
 @app.route('/forum/<int:forum_id>/<int:chain_id>')
 def show_chain(forum_id, chain_id):
-    messages = fr.get_messages_in_chain(chain_id)
-    chain_info = fr.get_chain_info(chain_id)[0]
+    messages = fr.get_messages_info(chain_id)
+    chain_info = fr.get_chains_info(chain_id)[0]
     return render_template('chain.html', id=chain_id, forum_id=forum_id, messages=messages, chain_info=chain_info)
 
 
@@ -128,3 +118,18 @@ def new_message():
 
     forum_id = request.form['forum_id']
     return redirect(f'/forum/{forum_id}/{chain_id}')
+
+@app.post('/new_forum')
+def new_forum():
+    users.check_csrf()
+    users.require_role(2)
+
+    name = request.form['name']
+    if name == "":
+        return render_template("error.html", message="You have to give the forum a name")
+    if len(name) > 20:
+        return render_template("error.html", message="The forum-name is too long")
+
+    creator_id = users.user_id()
+    forum_id = fr.add_new_forum(name, creator_id)
+    return redirect(f'/forum/{forum_id}')
