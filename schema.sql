@@ -25,3 +25,6 @@ CREATE TABLE messages (
     message TEXT,
     sent_at TIMESTAMPTZ DEFAULT Now()
 );
+
+ALTER TABLE chains ADD deleted BOOLEAN;
+ALTER TABLE forums ADD deleted BOOLEAN;

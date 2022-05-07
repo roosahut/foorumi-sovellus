@@ -7,10 +7,10 @@ def get_all_forums():
 
 
 def get_forums_info():
-    sql_get_chain_count_in_forum = '(SELECT COUNT(c.id) FROM chains c WHERE f.id = c.forum_id)'
-    sql_message_count_in_forum = '(SELECT COUNT(m.id) FROM messages m, chains c WHERE c.id = m.chain_id AND f.id = c.forum_id GROUP BY f.id)'
-    sql_get_last_sent_message = '(SELECT TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m LEFT JOIN chains c ON c.id = m.chain_id WHERE f.id = c.forum_id ORDER BY m.sent_at DESC LIMIT 1)'
-    sql_all = f'SELECT f.id, f.name, {sql_get_chain_count_in_forum}, {sql_message_count_in_forum}, {sql_get_last_sent_message} FROM forums f'
+    sql_get_chain_count_in_forum = '(SELECT COUNT(c.id) FROM chains c WHERE f.id = c.forum_id AND c.deleted = False)'
+    sql_message_count_in_forum = '(SELECT COUNT(m.id) FROM messages m, chains c WHERE c.id = m.chain_id AND f.id = c.forum_id AND c.deleted = False GROUP BY f.id)'
+    sql_get_last_sent_message = '(SELECT TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m LEFT JOIN chains c ON c.id = m.chain_id WHERE f.id = c.forum_id AND c.deleted = False ORDER BY m.sent_at DESC LIMIT 1)'
+    sql_all = f'SELECT f.id, f.name, {sql_get_chain_count_in_forum}, {sql_message_count_in_forum}, {sql_get_last_sent_message} FROM forums f WHERE f.deleted = False'
     return db.session.execute(sql_all).fetchall()
 
 
@@ -22,7 +22,7 @@ def get_forum_name(forum_id):
 def get_chains_info_in_forum(forum_id):
     sql_last_sent_message = '(SELECT TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m WHERE m.chain_id = c.id ORDER BY m.sent_at DESC LIMIT 1)'
     sql_message_count_in_chain = '(SELECT COUNT(m.id) FROM messages m WHERE c.id = m.chain_id)'
-    sql = f'SELECT c.id, c.headline, {sql_message_count_in_chain}, {sql_last_sent_message} FROM chains c WHERE c.forum_id = :forum_id GROUP BY c.id'
+    sql = f'SELECT c.id, c.headline, {sql_message_count_in_chain}, {sql_last_sent_message} FROM chains c WHERE c.forum_id = :forum_id AND c.deleted = False GROUP BY c.id'
     return db.session.execute(sql, {'forum_id': forum_id}).fetchall()
 
 
@@ -37,7 +37,7 @@ def get_chains_info(chain_id):
 
 
 def add_new_chain(headline, message, creator_id, forum_id):
-    sql = 'INSERT INTO chains (headline, creator_id, forum_id) VALUES (:headline, :creator_id, :forum_id) RETURNING id'
+    sql = 'INSERT INTO chains (headline, creator_id, forum_id, deleted) VALUES (:headline, :creator_id, :forum_id, False) RETURNING id'
     chain_id = db.session.execute(
         sql, {'headline': headline, 'creator_id': creator_id, 'forum_id': forum_id}).fetchone()[0]
     add_new_message(message, creator_id, chain_id)
@@ -59,15 +59,28 @@ def add_new_forum(name, creator_id):
     db.session.commit()
     return forum_id
 
+def delete_forum(forum_id, creator_id):
+    pass
 
-def delete_message(message_id):
-    sql = 'DELETE FROM messages WHERE id = :message_id'
-    db.session.execute(sql, {'message_id': message_id})
+
+def delete_message(message_id, writer_id):
+    sql = 'DELETE FROM messages WHERE id = :message_id AND writer_id = :writer_id'
+    db.session.execute(sql, {'message_id': message_id, 'writer_id': writer_id})
     db.session.commit()
 
 
-def edit_message(message_id, new_message):
-    sql = 'UPDATE messages SET message = :new_message WHERE id = :message_id'
+def edit_message(message_id, new_message, writer_id):
+    sql = 'UPDATE messages SET message = :new_message WHERE id = :message_id AND writer_id = :writer_id'
     db.session.execute(
-        sql, {'new_message': new_message, 'message_id': message_id})
+        sql, {'new_message': new_message, 'message_id': message_id, 'writer_id': writer_id})
+    db.session.commit()
+
+def edit_chain_headline(chain_id, new_headline, writer_id):
+    sql = 'UPDATE chains SET headline = :new_headline WHERE id = :chain_id AND creator_id = :writer_id'
+    db.session.execute(sql, {'new_headline': new_headline, 'chain_id': chain_id, 'writer_id': writer_id})
+    db.session.commit()
+
+def delete_chain(chain_id, creator_id):
+    sql = 'UPDATE chains SET deleted = True WHERE id = :chain_id AND creator_id = :creator_id'
+    db.session.execute(sql, {'chain_id': chain_id, 'creator_id': creator_id})
     db.session.commit()

@@ -108,7 +108,7 @@ def new_message():
 
     message = request.form['message']
     if message == "":
-        return render_template("error.html", message="You have to write a message to start the chain")
+        return render_template("error.html", message="You have to write a message to submit")
     if len(message) > 10000:
         return render_template("error.html", message="The message is too long")
 
@@ -139,7 +139,8 @@ def delete_message():
     users.check_csrf()
 
     message_id = request.form['message_id']
-    fr.delete_message(message_id)
+    writer_id = users.user_id()
+    fr.delete_message(message_id, writer_id)
 
     forum_id = request.form['forum_id']
     chain_id = request.form['chain_id']
@@ -153,14 +154,44 @@ def edit_message(forum_id, chain_id, message_id):
 
     if request.method == 'POST':
         users.check_csrf()
-        writer_id = users.user_id()
 
         message = request.form['message']
         if message == "":
-            return render_template("error.html", message="You have to write a message to start the chain")
+            return render_template("error.html", message="You have to write a message")
         if len(message) > 10000:
             return render_template("error.html", message="The message is too long")
+        writer_id = users.user_id()
 
-        fr.edit_message(message_id, message)
+        fr.edit_message(message_id, message, writer_id)
 
         return redirect(f'/forum/{forum_id}/{chain_id}')
+
+@app.route('/forum/<int:forum_id>/<int:chain_id>/edit_headline', methods=['get', 'post'])
+def edit_headline(forum_id, chain_id):
+    if request.method == 'GET':
+        return render_template('edit_headline.html', forum_id=forum_id, chain_id=chain_id)
+
+    if request.method == 'POST':
+        users.check_csrf()
+
+        headline = request.form['headline']
+        if headline == "":
+            return render_template("error.html", message="You have to write something to be the headline")
+        if 2 > len(headline) > 20:
+            return render_template("error.html", message="Headline must be between 2-15 characters")
+        writer_id = users.user_id()
+
+        fr.edit_chain_headline(chain_id, headline, writer_id)
+
+        return redirect(f'/forum/{forum_id}/{chain_id}')
+
+@app.post('/delete_chain')
+def delete_chain():
+    users.check_csrf()
+
+    chain_id = request.form['chain_id']
+    creator_id = users.user_id()
+    fr.delete_chain(chain_id, creator_id)
+
+    forum_id = request.form['forum_id']
+    return redirect(f'/forum/{forum_id}')
