@@ -90,3 +90,9 @@ def delete_chain(chain_id, creator_id):
     sql = 'UPDATE chains SET deleted = True WHERE id = :chain_id AND creator_id = :creator_id'
     db.session.execute(sql, {'chain_id': chain_id, 'creator_id': creator_id})
     db.session.commit()
+
+
+def find_messages_with_word(word):
+    sql = 'SELECT * FROM messages WHERE message LIKE :word1 OR message LIKE :word2 OR message LIKE :word3'
+    messages = db.session.execute(sql, {'word1': word+'%', 'word2': '%'+word+'%', 'word3': '%'+word}).fetchall()
+    return messages

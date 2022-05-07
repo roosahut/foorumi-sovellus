@@ -206,3 +206,20 @@ def delete_forum():
 
     forum_id = request.form['forum_id']
     return redirect(f'/')
+
+@app.route('/search', methods=['get', 'post'])
+def search_messages():
+    if request.method == 'GET':
+        is_words = False
+        return render_template('search.html', is_words=is_words)
+
+    if request.method == 'POST':
+        users.check_csrf()
+
+        word = request.form['word']
+        if word == "":
+            return render_template("error.html", message="You have to input a word or letter")
+        words = fr.find_messages_with_word(word)
+        is_words = True
+
+        return render_template('search.html', words=words, is_words=is_words)
