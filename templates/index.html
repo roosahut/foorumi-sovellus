@@ -12,6 +12,7 @@ Name of the forum: <input type="text" name="name">
 <p>
     <input type="submit" value="Create a new forum">
 </form>
+You can also delete existing forums
 {% endif %}
 <p>
 <form action="/logout" method="post">
@@ -31,5 +32,12 @@ Not logged in
     <li><a href="/forum/{{ forum[0] }}">{{ forum[1]}}</a>
     <p> chains: {{ forum[2] }} messages: {{ forum[3] }} last activity: {{ forum[4] }}
     </li>
+    {% if session.user_role == 2 %}
+    <form action="/delete_forum" method="post">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <input type="hidden" name="forum_id" value="{{ forum[0] }}">
+        <input type="submit" value="Delete this forum">
+    </form>
+    {% endif %}
     {% endfor %}
     </ul>

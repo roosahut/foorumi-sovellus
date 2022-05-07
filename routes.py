@@ -195,3 +195,14 @@ def delete_chain():
 
     forum_id = request.form['forum_id']
     return redirect(f'/forum/{forum_id}')
+
+@app.post('/delete_forum')
+def delete_forum():
+    users.check_csrf()
+    users.require_role(2)
+
+    forum_id = request.form['forum_id']
+    fr.delete_forum(forum_id)
+
+    forum_id = request.form['forum_id']
+    return redirect(f'/')

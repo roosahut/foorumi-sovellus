@@ -53,14 +53,17 @@ def add_new_message(message, writer_id, chain_id):
 
 
 def add_new_forum(name, creator_id):
-    sql = 'INSERT INTO forums (name, creator_id) VALUES (:name, :creator_id) RETURNING id'
+    sql = 'INSERT INTO forums (name, creator_id, deleted) VALUES (:name, :creator_id, False) RETURNING id'
     forum_id = db.session.execute(
         sql, {'name': name, 'creator_id': creator_id}).fetchone()[0]
     db.session.commit()
     return forum_id
 
-def delete_forum(forum_id, creator_id):
-    pass
+
+def delete_forum(forum_id):
+    sql = 'UPDATE forums SET deleted = True WHERE id = :forum_id'
+    db.session.execute(sql, {'forum_id': forum_id})
+    db.session.commit()
 
 
 def delete_message(message_id, writer_id):
@@ -75,10 +78,13 @@ def edit_message(message_id, new_message, writer_id):
         sql, {'new_message': new_message, 'message_id': message_id, 'writer_id': writer_id})
     db.session.commit()
 
+
 def edit_chain_headline(chain_id, new_headline, writer_id):
     sql = 'UPDATE chains SET headline = :new_headline WHERE id = :chain_id AND creator_id = :writer_id'
-    db.session.execute(sql, {'new_headline': new_headline, 'chain_id': chain_id, 'writer_id': writer_id})
+    db.session.execute(sql, {'new_headline': new_headline,
+                       'chain_id': chain_id, 'writer_id': writer_id})
     db.session.commit()
+
 
 def delete_chain(chain_id, creator_id):
     sql = 'UPDATE chains SET deleted = True WHERE id = :chain_id AND creator_id = :creator_id'
