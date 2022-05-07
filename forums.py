@@ -93,6 +93,8 @@ def delete_chain(chain_id, creator_id):
 
 
 def find_messages_with_word(word):
-    sql = 'SELECT * FROM messages WHERE message LIKE :word1 OR message LIKE :word2 OR message LIKE :word3'
+    sql_forum_id = '(SELECT f.id FROM forums f, chains c WHERE f.id = c.forum_id AND c.id = m.chain_id)'
+    sql_writer_name = '(SELECT u.username FROM users u WHERE u.id = m.writer_id)'
+    sql = f'SELECT m.id, m.chain_id, {sql_forum_id}, {sql_writer_name}, m.message, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m WHERE m.message LIKE :word1 OR m.message LIKE :word2 OR m.message LIKE :word3'
     messages = db.session.execute(sql, {'word1': word+'%', 'word2': '%'+word+'%', 'word3': '%'+word}).fetchall()
     return messages

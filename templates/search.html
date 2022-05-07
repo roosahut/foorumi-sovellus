@@ -8,10 +8,17 @@
     </form>
 
 {% if is_words %}
-{% if words == [] %}
+{% if messages == [] %}
 No results
 {% else %}
-{{ words }}
+
+{% for message in messages %}
+{{ message[4] }}
+<p> sent by {{ message[3] }} at {{ message[5] }}
+    <a href="/forum/{{ message[2] }}/{{ message[1] }}">Go to this message</a>
+</p>
+
+{% endfor %}
 {% endif %}
 {% endif %}
 <p>
