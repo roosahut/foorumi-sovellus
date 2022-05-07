@@ -26,5 +26,13 @@ CREATE TABLE messages (
     sent_at TIMESTAMPTZ DEFAULT Now()
 );
 
+CREATE TABLE likes (
+    id SERIAL PRIMARY KEY,
+    liker_id INTEGER REFERENCES users,
+    message_id INTEGER REFERENCES messages,
+    is_unlike BOOLEAN
+);
+
 ALTER TABLE chains ADD deleted BOOLEAN;
 ALTER TABLE forums ADD deleted BOOLEAN;
+ALTER TABLE messages ADD deleted BOOLEAN;

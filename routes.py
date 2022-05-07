@@ -223,3 +223,33 @@ def search_messages():
         is_words = True
 
         return render_template('search.html', messages=messages, is_words=is_words)
+
+@app.post('/like_message')
+def like_message():
+    users.check_csrf()
+
+    liker_id = users.user_id()
+    message_id = request.form['message_id']
+    if not fr.has_user_liked_message(message_id, liker_id):
+        return render_template("error.html", message="You can't like the same message twice")
+    else:
+        fr.like_message(message_id, liker_id)
+
+        forum_id = request.form['forum_id']
+        chain_id = request.form['chain_id']
+        return redirect(f'/forum/{forum_id}/{chain_id}')
+
+@app.post('/unlike_message')
+def unlike_message():
+    users.check_csrf()
+
+    liker_id = users.user_id()
+    message_id = request.form['message_id']
+    if not fr.has_user_unliked_message(message_id, liker_id):
+        return render_template("error.html", message="You can't unlike the same message twice")
+    else:
+        fr.unlike_message(message_id, liker_id)
+        
+        forum_id = request.form['forum_id']
+        chain_id = request.form['chain_id']
+        return redirect(f'/forum/{forum_id}/{chain_id}')
