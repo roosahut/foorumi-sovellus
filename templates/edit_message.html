@@ -1,0 +1,8 @@
+<h2>Edit your message</h2>
+
+<form action="/forum/{{ forum_id }}/{{ chain_id }}/{{ message_id }}" method="post">
+<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+Edited message: <textarea name="message" rows="4" cols="60" value="message"></textarea>
+<p>
+<input type="submit" value="Send">
+</form>

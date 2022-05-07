@@ -3,9 +3,21 @@ created by {{ chain_info[1] }}
 <p>
 
     {% for message in messages %}
-    {{ message[0] }}
+    {{ message[1] }}
 <p>
-    sent by {{ message[1] }} at {{ message[2] }}
+    sent by {{ message[2] }} at {{ message[3] }}
+    {% if session.user_name == message[2] %}
+    <form action="/delete_message" method="post">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+        <input type="hidden" name="chain_id" value="{{ id }}">
+        <input type="hidden" name="forum_id" value="{{ forum_id }}">
+        <input type="hidden" name="message_id" value="{{ message[0] }}">
+        <input type="hidden" name="user_id" value="{session.user_id}">
+        <input type="submit" value="Delete">
+    </form>
+    <a href="/forum/{{ forum_id }}/{{ id }}/{{ message[0] }}">Edit message</a>
+    {% endif %}
+<p>
 <p>
     {% endfor %}
 

@@ -27,7 +27,7 @@ def get_chains_info_in_forum(forum_id):
 
 
 def get_messages_info(chain_id):
-    sql = 'SELECT m.message, u.username, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m, users u WHERE m.chain_id = :chain_id AND u.id = m.writer_id ORDER BY m.sent_at'
+    sql = 'SELECT m.id, m.message, u.username, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m, users u WHERE m.chain_id = :chain_id AND u.id = m.writer_id ORDER BY m.sent_at'
     return db.session.execute(sql, {'chain_id': chain_id}).fetchall()
 
 
@@ -58,3 +58,16 @@ def add_new_forum(name, creator_id):
         sql, {'name': name, 'creator_id': creator_id}).fetchone()[0]
     db.session.commit()
     return forum_id
+
+
+def delete_message(message_id):
+    sql = 'DELETE FROM messages WHERE id = :message_id'
+    db.session.execute(sql, {'message_id': message_id})
+    db.session.commit()
+
+
+def edit_message(message_id, new_message):
+    sql = 'UPDATE messages SET message = :new_message WHERE id = :message_id'
+    db.session.execute(
+        sql, {'new_message': new_message, 'message_id': message_id})
+    db.session.commit()

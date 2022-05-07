@@ -92,11 +92,9 @@ def add_new_chain(forum_id):
             return render_template("error.html", message="You have to write a message to start the chain")
         if len(message) > 10000:
             return render_template("error.html", message="The message is too long")
-# tee tälle jotain et se ei ota sitä kahesti
+
         chain_id = fr.add_new_chain(
             headline, message, users.user_id(), forum_id)
-        # if not fr.add_new_chain(headline, message, users.user_id(), forum_id):
-        #    return render_template("error.html", message="Error in adding the chain")
 
         return redirect(f'/forum/{forum_id}/{chain_id}')
 
@@ -119,6 +117,7 @@ def new_message():
     forum_id = request.form['forum_id']
     return redirect(f'/forum/{forum_id}/{chain_id}')
 
+
 @app.post('/new_forum')
 def new_forum():
     users.check_csrf()
@@ -133,3 +132,35 @@ def new_forum():
     creator_id = users.user_id()
     forum_id = fr.add_new_forum(name, creator_id)
     return redirect(f'/forum/{forum_id}')
+
+
+@app.post('/delete_message')
+def delete_message():
+    users.check_csrf()
+
+    message_id = request.form['message_id']
+    fr.delete_message(message_id)
+
+    forum_id = request.form['forum_id']
+    chain_id = request.form['chain_id']
+    return redirect(f'/forum/{forum_id}/{chain_id}')
+
+
+@app.route('/forum/<int:forum_id>/<int:chain_id>/<int:message_id>', methods=['get', 'post'])
+def edit_message(forum_id, chain_id, message_id):
+    if request.method == 'GET':
+        return render_template('edit_message.html', forum_id=forum_id, chain_id=chain_id, message_id=message_id)
+
+    if request.method == 'POST':
+        users.check_csrf()
+        writer_id = users.user_id()
+
+        message = request.form['message']
+        if message == "":
+            return render_template("error.html", message="You have to write a message to start the chain")
+        if len(message) > 10000:
+            return render_template("error.html", message="The message is too long")
+
+        fr.edit_message(message_id, message)
+
+        return redirect(f'/forum/{forum_id}/{chain_id}')
