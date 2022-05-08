@@ -48,7 +48,7 @@ def get_forum_name(forum_id):
 
 def get_chains_info_in_forum(forum_id):
     sql_last_sent_message = '(SELECT TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m WHERE m.chain_id = c.id AND m.deleted = False ORDER BY m.sent_at DESC LIMIT 1)'
-    sql_message_count_in_chain = '(SELECT COUNT(m.id) FROM messages m WHERE c.id = m.chain_id)'
+    sql_message_count_in_chain = '(SELECT COUNT(m.id) FROM messages m WHERE c.id = m.chain_id AND m.deleted = False)'
     sql = f'SELECT c.id, c.headline, {sql_message_count_in_chain}, {sql_last_sent_message} FROM chains c WHERE c.forum_id = :forum_id AND c.deleted = False GROUP BY c.id'
     return db.session.execute(sql, {'forum_id': forum_id}).fetchall()
 
@@ -100,6 +100,16 @@ def delete_forum(forum_id):
     db.session.execute(sql, {'forum_id': forum_id})
     db.session.commit()
 
+    sql_chains_in_forum = '(SELECT id FROM chains WHERE forum_id: forum_id)'
+    sql_delete_chains = f'UPDATE chains SET deleted = True WHERE id = {sql_chains_in_forum}'
+    db.session.execute(sql_delete_chains, {'forum_id': forum_id})
+    db.session.commit()
+
+    sql_messages_in_forum = f'(SELECT id FROM messages WHERE chain_id IN {sql_chains_in_forum})'
+    sql_delete_messages = f'UPDATE messages SET deleted = True WHERE id = {sql_messages_in_forum}'
+    db.session.execute(sql_delete_messages, {'forum_id': forum_id})
+    db.session_execute
+
 
 def delete_message(message_id, writer_id):
     sql = 'UPDATE messages SET deleted = True WHERE id = :message_id AND writer_id = :writer_id'
@@ -126,11 +136,18 @@ def delete_chain(chain_id, creator_id):
     db.session.execute(sql, {'chain_id': chain_id, 'creator_id': creator_id})
     db.session.commit()
 
+    sql_messages_in_chain = '(SELECT id FROM messages WHERE chain_id = :chain_id)'
+    sql_delete_messages = f'UPDATE messages SET deleted = True WHERE id IN {sql_messages_in_chain}'
+    db.session.execute(sql_delete_messages, {'chain_id': chain_id})
+    db.session.commit()
 
-def find_messages_with_word(word):
+
+def search_messages_with_word(word, user_id):
     sql_forum_id = '(SELECT f.id FROM forums f, chains c WHERE f.id = c.forum_id AND c.id = m.chain_id)'
     sql_writer_name = '(SELECT u.username FROM users u WHERE u.id = m.writer_id)'
-    sql = f'SELECT m.id, m.chain_id, {sql_forum_id}, {sql_writer_name}, m.message, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m WHERE m.deleted = False AND m.message LIKE :word1 OR m.message LIKE :word2 OR m.message LIKE :word3'
+    sql = f'''SELECT m.id, m.chain_id, {sql_forum_id}, {sql_writer_name}, m.message, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\'), m.deleted 
+    FROM messages m 
+    WHERE m.deleted = False AND (m.message LIKE :word1 OR m.message LIKE :word2 OR m.message LIKE :word3)'''
     messages = db.session.execute(
         sql, {'word1': word+'%', 'word2': '%'+word+'%', 'word3': '%'+word}).fetchall()
     return messages

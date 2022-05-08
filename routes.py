@@ -278,7 +278,7 @@ def search_messages():
         word = request.form['word']
         if word == "":
             return render_template("error.html", message="You have to input a word or letter")
-        messages = fr.find_messages_with_word(word)
+        messages = fr.search_messages_with_word(word)
         is_words = True
 
         return render_template('search.html', messages=messages, is_words=is_words)
