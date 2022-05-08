@@ -8,6 +8,9 @@
     <a href="/">Front page</a>
 </div>
 <p>Logged in as <b>{{ session.user_name }}</b></p>
+<form action="/logout" method="post">
+    <input type="submit" value="Logout">
+</form>
 
 {% else %}
 
@@ -21,7 +24,6 @@
 
 {% endif %}
 
-<h2>{{ chain_info[0] }}</h2>
 {% if session.user_name == chain_info[1] %}
 <hr>
 <p>You are the creator of this chain</p>
@@ -34,8 +36,11 @@
 </form>
 </p> or <p><a href="/forum/{{ forum_id }}/{{ id }}/edit_headline">Edit headline</a>
 </p>
-
+<hr>
 {% endif %}
+
+<h2>{{ chain_info[0] }}</h2>
+
 {% for message in messages %}
 <hr>
 <p>{{ message[1] }}

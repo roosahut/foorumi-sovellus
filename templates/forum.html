@@ -11,7 +11,10 @@
 </div>
 <h2>{{ name }} forum</h2>
 <p>Logged in as <b>{{ session.user_name }}</b></p>
-
+<p>Create a new chain by pressing the button above!</p>
+<form action="/logout" method="post">
+    <input type="submit" value="Logout">
+</form>
 {% else %}
 
 <div class="topnav">
@@ -25,8 +28,10 @@
 
 {% endif %}
 
-<h3>Chains in {{ name }} forum</h3>
-
+<h3>Chains</h3>
+{% if chains == [] %}
+<p>No chains in this forum yet, create the first one!</p>
+{% endif %}
 <ul>
 
     {% for chain in chains %}
