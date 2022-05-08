@@ -33,6 +33,13 @@ CREATE TABLE likes (
     is_unlike BOOLEAN
 );
 
+CREATE TABLE has_access (
+    id SERIAL PRIMARY KEY,
+    forum_id INTEGER REFERENCES forums,
+    user_id INTEGER REFERENCES users
+);
+
 ALTER TABLE chains ADD deleted BOOLEAN;
 ALTER TABLE forums ADD deleted BOOLEAN;
 ALTER TABLE messages ADD deleted BOOLEAN;
+ALTER TABLE forums ADD is_secret BOOLEAN;

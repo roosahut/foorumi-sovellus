@@ -11,6 +11,19 @@ Create a new forum here
     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 Name of the forum: <input type="text" name="name">
 <p>
+    Do you want the forum to be
+    <select id="access_choice" name="access_choice" onchange="choice_change(this)">
+        <option value="public">Public</option>
+        <option value="private">Private</option>
+    </select>
+ 
+  <div id="userList" style="display: none;">
+    Select the users you want to see the forum:
+    <p>
+  {% for user in users %}
+  <input type="checkbox" name="allowed_user" value="{{ user[0] }}" checked> {{ user[1] }}
+  {% endfor %}
+  </div>
     <input type="submit" value="Create a new forum">
 </form>
 You can also delete existing forums
@@ -42,3 +55,15 @@ Not logged in
     {% endif %}
     {% endfor %}
     </ul>
+
+<script defer>
+var user_select = document.querySelector('#userList')
+function choice_change(e) {
+    if (e.value === 'private'){
+        user_select.style = 'display:block;'
+    } else {
+        user_select.style = 'display:none;'
+    }
+}
+
+</script>
