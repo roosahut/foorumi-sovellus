@@ -227,3 +227,19 @@ def is_user_message_writer(message_id, user_id):
         return False
     else:
         return True
+
+
+def is_forum_deleted(forum_id):
+    sql = 'SELECT deleted FROM forums where id = :forum_id'
+    value = db.session.execute(sql, {'forum_id': forum_id}).fetchone()[0]
+    return value
+
+def is_chain_deleted(chain_id):
+    sql = 'SELECT deleted FROM chains where id = :chain_id'
+    value = db.session.execute(sql, {'chain_id': chain_id}).fetchone()[0]
+    return value
+
+def is_message_deleted(message_id):
+    sql = 'SELECT deleted FROM messages where id = :message_id'
+    value = db.session.execute(sql, {'message_id': message_id}).fetchone()[0]
+    return value

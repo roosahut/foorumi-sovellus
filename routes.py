@@ -62,6 +62,9 @@ def logout():
 
 @app.route('/forum/<int:forum_id>')
 def show_forum(forum_id):
+    if fr.is_forum_deleted(forum_id):
+        return render_template('error.html', message='This forum is deleted')
+
     if fr.has_user_forum_access(forum_id, users.user_id()):
         chains = fr.get_chains_info_in_forum(forum_id)
         name = fr.get_forum_name(forum_id)[0]
@@ -72,6 +75,9 @@ def show_forum(forum_id):
 
 @app.route('/forum/<int:forum_id>/<int:chain_id>')
 def show_chain(forum_id, chain_id):
+    if fr.is_chain_deleted(chain_id):
+        return render_template('error.html', message='This chain is deleted')
+
     if fr.has_user_forum_access(forum_id, users.user_id()):
         messages = fr.get_messages_info(chain_id)
         chain_info = fr.get_chains_info(chain_id)[0]
@@ -84,6 +90,9 @@ def show_chain(forum_id, chain_id):
 @app.route('/forum/<int:forum_id>/new_chain', methods=['get', 'post'])
 def add_new_chain(forum_id):
     if request.method == 'GET':
+        if fr.is_forum_deleted(forum_id):
+            return render_template('error.html', message='This forum is deleted')
+
         if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
             return render_template('new_chain.html', forum_id=forum_id)
 
@@ -92,6 +101,9 @@ def add_new_chain(forum_id):
 
     if request.method == 'POST':
         users.check_csrf()
+
+        if fr.is_forum_deleted(forum_id):
+            return render_template('error.html', message='This forum is deleted')
 
         if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
             headline = request.form['headline']
@@ -119,10 +131,13 @@ def add_new_chain(forum_id):
 def new_message():
     users.check_csrf()
 
+    chain_id = request.form['chain_id']
     forum_id = request.form['forum_id']
+
+    if fr.is_chain_deleted(chain_id):
+        return render_template('error.html', message='This chain is deleted')
+
     if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
-        chain_id = request.form['chain_id']
-        writer_id = users.user_id()
 
         message = request.form['message']
         if message == "":
@@ -130,7 +145,7 @@ def new_message():
         if len(message) > 10000:
             return render_template("error.html", message="The message is too long")
 
-        fr.add_new_message(message, writer_id, chain_id)
+        fr.add_new_message(message, users.user_id(), chain_id)
 
         return redirect(f'/forum/{forum_id}/{chain_id}')
 
@@ -173,6 +188,10 @@ def delete_message():
 
     forum_id = request.form['forum_id']
     message_id = request.form['message_id']
+
+    if fr.is_message_deleted(message_id):
+        return render_template('error.html', message='This message is already deleted')
+
     if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_message_writer(message_id, users.user_id()):
         fr.delete_message(message_id, users.user_id())
 
@@ -186,6 +205,9 @@ def delete_message():
 @app.route('/forum/<int:forum_id>/<int:chain_id>/<int:message_id>', methods=['get', 'post'])
 def edit_message(forum_id, chain_id, message_id):
     if request.method == 'GET':
+        if fr.is_message_deleted(message_id):
+            return render_template('error.html', message='This message is deleted')
+
         if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_message_writer(message_id, users.user_id()):
             return render_template('edit_message.html', forum_id=forum_id, chain_id=chain_id, message_id=message_id)
         else:
@@ -193,6 +215,9 @@ def edit_message(forum_id, chain_id, message_id):
 
     if request.method == 'POST':
         users.check_csrf()
+
+        if fr.is_message_deleted(message_id):
+            return render_template('error.html', message='This message is deleted')
 
         if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_message_writer(message_id, users.user_id()):
             message = request.form['message']
@@ -213,6 +238,9 @@ def edit_message(forum_id, chain_id, message_id):
 @app.route('/forum/<int:forum_id>/<int:chain_id>/edit_headline', methods=['get', 'post'])
 def edit_headline(forum_id, chain_id):
     if request.method == 'GET':
+        if fr.is_chain_deleted(chain_id):
+            return render_template('error.html', message='This chain is deleted')
+
         if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_chain_creator(chain_id, users.user_id()):
             return render_template('edit_headline.html', forum_id=forum_id, chain_id=chain_id)
 
@@ -221,6 +249,9 @@ def edit_headline(forum_id, chain_id):
 
     if request.method == 'POST':
         users.check_csrf()
+
+        if fr.is_chain_deleted(chain_id):
+            return render_template('error.html', message='This chain is deleted')
 
         if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_chain_creator(chain_id, users.user_id()):
             headline = request.form['headline']
@@ -244,8 +275,11 @@ def delete_chain():
 
     forum_id = request.form['forum_id']
     chain_id = request.form['chain_id']
-    if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_chain_creator(chain_id, users.user_id()):
 
+    if fr.is_chain_deleted(chain_id):
+        return render_template('error.html', message='This chain is already deleted')
+
+    if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_chain_creator(chain_id, users.user_id()):
         fr.delete_chain(chain_id, users.user_id())
 
         return redirect(f'/forum/{forum_id}')
@@ -260,6 +294,10 @@ def delete_forum():
     users.require_role(2)
 
     forum_id = request.form['forum_id']
+
+    if fr.is_forum_deleted(forum_id):
+        return render_template('error.html', message='This forum is already deleted')
+
     fr.delete_forum(forum_id)
 
     forum_id = request.form['forum_id']
@@ -289,9 +327,14 @@ def like_message():
     users.check_csrf()
 
     forum_id = request.form['forum_id']
+    message_id = request.form['message_id']
+
+    if fr.is_message_deleted(message_id):
+        return render_template('error.html', message='This message is deleted')
+
     if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
         liker_id = users.user_id()
-        message_id = request.form['message_id']
+
         if not fr.has_user_liked_message(message_id, liker_id):
             return render_template("error.html", message="You can't like the same message twice")
         else:
@@ -309,9 +352,14 @@ def unlike_message():
     users.check_csrf()
 
     forum_id = request.form['forum_id']
+    message_id = request.form['message_id']
+
+    if fr.is_message_deleted(message_id):
+        return render_template('error.html', message='This message is deleted')
+
     if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
         liker_id = users.user_id()
-        message_id = request.form['message_id']
+        
         if not fr.has_user_unliked_message(message_id, liker_id):
             return render_template("error.html", message="You can't unlike the same message twice")
         else:
