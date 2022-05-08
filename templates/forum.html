@@ -1,27 +1,43 @@
-<h2>{{ name }} - forum</h2>
+{% extends "layout.html" %}
+{% block content %}
+
 
 {% if session.user_id %}
-Logged in as <b>{{ session.user_name }}</b>
-<p>
-    Create a new chain here!
-<p>
+
+<div class="topnav">
     <a href="/forum/{{ id }}/new_chain">New chain</a>
-<p>
-    {% else %}
-    You have to be logged in to create a new chain
-<p>
+    <a href="/search">Search for messages</a>
+    <a href="/">Front page</a>
+</div>
+<h2>{{ name }} forum</h2>
+<p>Logged in as <b>{{ session.user_name }}</b></p>
+
+{% else %}
+
+<div class="topnav">
     <a href="/login">Log in here</a>
     <a href="/register">Create an account here</a>
-    {% endif %}
-<p>
-<p>
-    Chains in {{ name }} - forum
-    {{ chains }}
-<p>
+    <a href="/search">Search for messages</a>
+    <a href="/">Front page</a>
+</div>
+<h2>{{ name }} forum</h2>
+<p>You have to be logged in to create a new chain</p>
+
+{% endif %}
+
+<h3>Chains in {{ name }} forum</h3>
+
+<ul>
+
     {% for chain in chains %}
-    <li><a href="/forum/{{ id }}/{{ chain[0] }}">{{ chain[1] }}</a>
-        <p> messages: {{ chain[2] }} last activity: {{ chain[3] }}
+    <hr>
+    <li>
+        <p><a href="/forum/{{ id }}/{{ chain[0] }}">{{ chain[1] }}</a></p>
+        <p> messages: {{ chain[2] }}</p>
+        <p>last activity: {{ chain[3] }} </p>
     </li>
     {% endfor %}
-    <p>
-        <a href="/">Front page</a>
+</ul>
+
+
+{% endblock %}

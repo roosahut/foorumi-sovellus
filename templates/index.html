@@ -1,69 +1,94 @@
-<h1>Chat-forum</h1>
+{% extends "layout.html" %}
+{% block content %}
+
+
 
 {% if session.user_id %}
-Logged in as <b>{{ session.user_name }}</b>
-<p>
-{% if session.user_role == 2 %}
-You are an admin<p>
-Create a new forum here
-</p>
-<form action="/new_forum" method="post">
-    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-Name of the forum: <input type="text" name="name">
-<p>
-    Do you want the forum to be
-    <select id="access_choice" name="access_choice" onchange="choice_change(this)">
-        <option value="public">Public</option>
-        <option value="private">Private</option>
-    </select>
- 
-  <div id="userList" style="display: none;">
-    Select the users you want to see the forum:
-    <p>
-  {% for user in users %}
-  <input type="checkbox" name="allowed_user" value="{{ user[0] }}" checked> {{ user[1] }}
-  {% endfor %}
-  </div>
-    <input type="submit" value="Create a new forum">
-</form>
-You can also delete existing forums
-{% endif %}
+
+<div class="topnav">
+    <a href="/search">Search for messages</a>
+</div>
+
+<p>Logged in as <b>{{ session.user_name }}</b></p>
 <p>
 <form action="/logout" method="post">
-<input type="submit" value="Logout">
+    <input type="submit" value="Logout">
 </form>
-{% else %}
-Not logged in
-<p>
-<a href="/login">Log in</a>
-<a href="/register">Create an account</a>
+</p>
+
+{% if session.user_role == 2 %}
+<hr>
+<p>You are an admin</p>
+<p>Create a new forum here</p>
+
+<form action="/new_forum" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <p>Name of the forum: <input type="text" name="name"></p>
+    <p>Do you want the forum to be
+        <select id="access_choice" name="access_choice" onchange="choice_change(this)">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+        </select>
+    </p>
+    <p>
+    <div id="userList" style="display: none;">
+        <p>Select the users you want to see the forum:</p>
+
+        {% for user in users %}
+        <input type="checkbox" name="allowed_user" value="{{ user[0] }}" checked> {{ user[1] }}
+        {% endfor %}
+    </div>
+    </p>
+    <p><input type="submit" value="Create a new forum"></p>
+</form>
+<p>You can also delete existing forums</p>
+<hr>
+
 {% endif %}
-<p>
+
+{% else %}
+
+<div class="topnav">
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+    <a href="/search">Search for messages</a>
+</div>
+<p>Not logged in </p>
+
+{% endif %}
+
+
 <h2>Forums</h2>
-<a href="/search">Search for messages here</a>
 <ul>
     {% for forum in forums %}
-    <li><a href="/forum/{{ forum[0] }}">{{ forum[1]}}</a>
-    <p> chains: {{ forum[2] }} messages: {{ forum[3] }} last activity: {{ forum[4] }}
+    <hr>
+    <li>
+        <p><a href="/forum/{{ forum[0] }}">{{ forum[1]}}</a></p>
+        <p> chains: {{ forum[2] }} messages: {{ forum[3] }}</p>
+        <p>last activity: {{ forum[4] }}</p>
     </li>
     {% if session.user_role == 2 %}
+    <p>
     <form action="/delete_forum" method="post">
         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         <input type="hidden" name="forum_id" value="{{ forum[0] }}">
         <input type="submit" value="Delete this forum">
     </form>
+    </p>
     {% endif %}
     {% endfor %}
-    </ul>
+</ul>
 
 <script defer>
-var user_select = document.querySelector('#userList')
-function choice_change(e) {
-    if (e.value === 'private'){
-        user_select.style = 'display:block;'
-    } else {
-        user_select.style = 'display:none;'
+    var user_select = document.querySelector('#userList')
+    function choice_change(e) {
+        if (e.value === 'private') {
+            user_select.style = 'display:block;'
+        } else {
+            user_select.style = 'display:none;'
+        }
     }
-}
 
 </script>
+
+{% endblock %}

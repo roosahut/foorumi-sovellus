@@ -1,0 +1,60 @@
+body {
+    margin: auto;
+    max-width: 55em;
+    font-family: 'Verdana', 'Arial', sans-serif;
+    background-color: #f0eaff;
+}
+
+table {
+    width: 80%;
+}
+
+td,
+th {
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
+}
+
+.header {
+    background: rgb(167, 133, 211);
+    font-weight: bold;
+    padding: 2em 1em;
+    font-size: 2em;
+}
+
+.topnav {
+    background-color: rgb(167, 133, 211);
+    overflow: hidden;
+}
+
+.topnav a {
+    float: left;
+    color: #000000;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.topnav a:hover {
+    background-color: rgb(207, 190, 221);
+    color: black;
+}
+
+main_body {
+    position: relative;
+}
+
+#bt1 {
+    position: absolute;
+    display: inline;
+    margin-left: 0px;
+    margin-bottom: 0px;
+}
+
+#bt2 {
+    position: absolute;
+    margin-left: 45px;
+    margin-top: 0px;
+}

@@ -1,8 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="topnav">
+    <a href="/search">Search for messages</a>
+    <a href="/">Front page</a>
+</div>
+
 <h2>Edit headline name</h2>
 
 <form action="/forum/{{ forum_id }}/{{ chain_id }}/edit_headline" method="post">
-<input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-Headline: <input type="text" name="headline">
-<p>
-<input type="submit" value="Send">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <p>Headline:</p>
+    <p><input type="text" name="headline">
+    </p>
+    <input type="submit" value="Send">
 </form>
+
+{% endblock %}

@@ -1,14 +1,21 @@
-<h1>Chat-forum</h1>
+{% extends "layout.html" %}
+{% block content %}
 
+
+<div class="topnav">
+    <a href="/register">Create an account</a>
+    <a href="/search">Search for messages</a>
+    <a href="/">Front page</a>
+</div>
 <h2>Login</h2>
 
 <form action="/login" method="post">
-Username: <input type="text" name="username">
-<p>
-Password: <input type="password" name="password">
-<p>
-<input type="submit" value="Login">
+    <p>Username: <input type="text" name="username">
+    </p>
+    <p>Password: <input type="password" name="password">
+    </p>
+    <p><input type="submit" value="Login"></p>
 </form>
-<p>
-<a href="/">Front page</a>
-<a href="/register">Create an account</a>
+
+
+{% endblock %}

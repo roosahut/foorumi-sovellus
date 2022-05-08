@@ -1,53 +1,93 @@
+{% extends "layout.html" %}
+{% block content %}
+
+{% if session.user_id %}
+
+<div class="topnav">
+    <a href="/search">Search for messages</a>
+    <a href="/">Front page</a>
+</div>
+<p>Logged in as <b>{{ session.user_name }}</b></p>
+
+{% else %}
+
+<div class="topnav">
+    <a href="/login">Log in here</a>
+    <a href="/register">Create an account here</a>
+    <a href="/search">Search for messages</a>
+    <a href="/">Front page</a>
+</div>
+<p>You have to be logged in to write a message</p>
+
+{% endif %}
+
 <h2>{{ chain_info[0] }}</h2>
 {% if session.user_name == chain_info[1] %}
-You are the creator of this chain
+<hr>
+<p>You are the creator of this chain</p>
 <p>
-    <form action="/delete_chain" method="post">
-        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <input type="hidden" name="chain_id" value="{{ id }}">
-        <input type="hidden" name="forum_id" value="{{ forum_id }}">
-        <input type="submit" value="Delete this chain">
-    </form> or <a href="/forum/{{ forum_id }}/{{ id }}/edit_headline">Edit headline</a>
+<form action="/delete_chain" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <input type="hidden" name="chain_id" value="{{ id }}">
+    <input type="hidden" name="forum_id" value="{{ forum_id }}">
+    <input type="submit" value="Delete this chain">
+</form>
+</p> or <p><a href="/forum/{{ forum_id }}/{{ id }}/edit_headline">Edit headline</a>
+</p>
+
 {% endif %}
-<p>
+{% for message in messages %}
+<hr>
+<p>{{ message[1] }}
+</p>
+<p>sent by {{ message[2] }} at {{ message[3] }}
+</p>
+<p>likes: {{ message[4] }} unlikes: {{ message[5] }}
+    {% if session.user_id %}
+<div id="main_body">
+    <div id="bt1">
+        <form action="/like_message" method="post">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            <input type="hidden" name="chain_id" value="{{ id }}">
+            <input type="hidden" name="forum_id" value="{{ forum_id }}">
+            <input type="hidden" name="message_id" value="{{ message[0] }}">
+            <input id="button" type="submit" value="Like">
+        </form>
+    </div>
 
-    {% for message in messages %}
-    {{ message[1] }}
-<p>
-    sent by {{ message[2] }} at {{ message[3] }}
-    <p>
-    likes: {{ message[4] }} unlikes: {{ message[5] }}
-    {% if session.user_name == message[2] %}
-    <form action="/delete_message" method="post">
-        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <input type="hidden" name="chain_id" value="{{ id }}">
-        <input type="hidden" name="forum_id" value="{{ forum_id }}">
-        <input type="hidden" name="message_id" value="{{ message[0] }}">
-        <input type="submit" value="Delete">
-    </form>
+    <div id="bt2">
+        <form action="/unlike_message" method="post">
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            <input type="hidden" name="chain_id" value="{{ id }}">
+            <input type="hidden" name="forum_id" value="{{ forum_id }}">
+            <input type="hidden" name="message_id" value="{{ message[0] }}">
+            <input id="button" type="submit" value="Unlike">
+        </form>
+    </div>
+</div>
+</p>
+<br>
+<hr>
+{% endif %}
+
+{% if session.user_name == message[2] %}
+
+<p>You are the writer of the message above, you can</p>
+<form action="/delete_message" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+    <input type="hidden" name="chain_id" value="{{ id }}">
+    <input type="hidden" name="forum_id" value="{{ forum_id }}">
+    <input type="hidden" name="message_id" value="{{ message[0] }}">
+    <input type="submit" value="Delete">
+</form>
+<p> or
     <a href="/forum/{{ forum_id }}/{{ id }}/{{ message[0] }}">Edit message</a>
-    {% endif %}
-    {% if session.user_id %}
-    <form action="/like_message" method="post">
-        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <input type="hidden" name="chain_id" value="{{ id }}">
-        <input type="hidden" name="forum_id" value="{{ forum_id }}">
-        <input type="hidden" name="message_id" value="{{ message[0] }}">
-        <input type="submit" value="Like">
-    </form>
-    <form action="/unlike_message" method="post">
-        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <input type="hidden" name="chain_id" value="{{ id }}">
-        <input type="hidden" name="forum_id" value="{{ forum_id }}">
-        <input type="hidden" name="message_id" value="{{ message[0] }}">
-        <input type="submit" value="Unlike">
-    </form>
-    {% endif %}
-<p>
-<p>
-    {% endfor %}
+</p>
 
-    {% if session.user_id %}
+{% endif %}
+{% endfor %}
+
+{% if session.user_id %}
 <h3>Write a new message</h3>
 <form action="/new_message" method="post">
     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
@@ -58,5 +98,6 @@ You are the creator of this chain
     <p><input type="submit" value="Send message">
 </form>
 {% endif %}
-<p>
-<a href="/">Front page</a>
+
+
+{% endblock %}
