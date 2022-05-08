@@ -3,9 +3,13 @@ import messages as ms
 
 
 def get_chains_info_in_forum(forum_id):
-    sql_last_sent_message = '(SELECT TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') FROM messages m WHERE m.chain_id = c.id AND m.deleted = False ORDER BY m.sent_at DESC LIMIT 1)'
+    sql_last_sent_message = '''(SELECT TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\') 
+    FROM messages m 
+    WHERE m.chain_id = c.id AND m.deleted = False ORDER BY m.sent_at DESC LIMIT 1)'''
     sql_message_count_in_chain = '(SELECT COUNT(m.id) FROM messages m WHERE c.id = m.chain_id AND m.deleted = False)'
-    sql = f'SELECT c.id, c.headline, {sql_message_count_in_chain}, {sql_last_sent_message} FROM chains c WHERE c.forum_id = :forum_id AND c.deleted = False GROUP BY c.id'
+    sql = f'''SELECT c.id, c.headline, {sql_message_count_in_chain}, {sql_last_sent_message} 
+    FROM chains c 
+    WHERE c.forum_id = :forum_id AND c.deleted = False GROUP BY c.id'''
     return db.session.execute(sql, {'forum_id': forum_id}).fetchall()
 
 

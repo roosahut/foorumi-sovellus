@@ -116,7 +116,7 @@ def add_new_chain(forum_id):
             if headline == "":
                 return render_template("error.html", message="You have to write a headline")
             if 2 > len(headline) > 20:
-                return render_template("error.html", message="Headline must be between 2-15 characters")
+                return render_template("error.html", message="Headline must be between 2-20 characters")
 
             message = request.form['message']
             if message == "":
@@ -167,8 +167,8 @@ def new_forum():
     name = request.form['name']
     if name == "":
         return render_template("error.html", message="You have to give the forum a name")
-    if len(name) > 20:
-        return render_template("error.html", message="The forum-name is too long")
+    if 2 > len(name) > 20:
+        return render_template("error.html", message="The forum name must be 2-10 characters")
 
     creator_id = users.user_id()
 
@@ -265,7 +265,7 @@ def edit_headline(forum_id, chain_id):
             if headline == "":
                 return render_template("error.html", message="You have to write something to be the headline")
             if 2 > len(headline) > 20:
-                return render_template("error.html", message="Headline must be between 2-15 characters")
+                return render_template("error.html", message="Headline must be between 2-20 characters")
             writer_id = users.user_id()
 
             ch.edit_chain_headline(chain_id, headline, writer_id)

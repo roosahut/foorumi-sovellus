@@ -4,7 +4,9 @@ from db import db
 def get_messages_info(chain_id):
     sql_likes = '(SELECT COUNT(l.id) FROM likes l WHERE m.id = l.message_id AND l.is_unlike = False)'
     sql_unlikes = '(SELECT COUNT(l.id) FROM likes l WHERE m.id = l.message_id AND l.is_unlike = True)'
-    sql = f'SELECT m.id, m.message, u.username, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\'), {sql_likes}, {sql_unlikes} FROM messages m, users u WHERE m.chain_id = :chain_id AND u.id = m.writer_id AND m.deleted = False ORDER BY m.sent_at'
+    sql = f'''SELECT m.id, m.message, u.username, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\'), {sql_likes}, {sql_unlikes} 
+    FROM messages m, users u 
+    WHERE m.chain_id = :chain_id AND u.id = m.writer_id AND m.deleted = False ORDER BY m.sent_at'''
     return db.session.execute(sql, {'chain_id': chain_id}).fetchall()
 
 
