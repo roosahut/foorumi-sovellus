@@ -21,20 +21,21 @@ def get_forums_info():
     user_id = users.user_id()
     sql_all = f'''SELECT f.id, f.name, {sql_get_chain_count_in_forum}, {sql_message_count_in_forum}, {sql_get_last_sent_message} 
     FROM forums f 
-    WHERE f.deleted = False AND f.is_secret = False OR f.id IN (SELECT forum_id FROM has_access WHERE user_id = :user_id)'''
+    WHERE f.deleted = False AND (f.is_secret = False OR f.id IN (SELECT forum_id FROM has_access WHERE user_id = :user_id))'''
 
     return db.session.execute(sql_all, {'user_id': user_id}).fetchall()
 
 
 def has_user_forum_access(forum_id, user_id):
     sql_check_is_forum_secret = 'SELECT is_secret FROM forums WHERE id = :forum_id'
-    is_secret = db.session.execute(sql_check_is_forum_secret, {'forum_id': forum_id}).fetchone()[0]
+    is_secret = db.session.execute(sql_check_is_forum_secret, {
+                                   'forum_id': forum_id}).fetchone()[0]
     if not is_secret:
         return True
-    else: 
+    else:
         sql = 'SELECT * FROM has_access WHERE forum_id = :forum_id AND user_id = :user_id'
         access = db.session.execute(
-        sql, {'forum_id': forum_id, 'user_id': user_id}).fetchall()
+            sql, {'forum_id': forum_id, 'user_id': user_id}).fetchall()
         if len(access) == 0:
             return False
         else:
@@ -100,15 +101,14 @@ def delete_forum(forum_id):
     db.session.execute(sql, {'forum_id': forum_id})
     db.session.commit()
 
-    sql_chains_in_forum = '(SELECT id FROM chains WHERE forum_id: forum_id)'
-    sql_delete_chains = f'UPDATE chains SET deleted = True WHERE id = {sql_chains_in_forum}'
+    sql_chains_in_forum = '(SELECT id FROM chains WHERE forum_id = :forum_id)'
+    sql_delete_chains = f'UPDATE chains SET deleted = True WHERE forum_id = :forum_id'
     db.session.execute(sql_delete_chains, {'forum_id': forum_id})
     db.session.commit()
 
-    sql_messages_in_forum = f'(SELECT id FROM messages WHERE chain_id IN {sql_chains_in_forum})'
-    sql_delete_messages = f'UPDATE messages SET deleted = True WHERE id = {sql_messages_in_forum}'
+    sql_delete_messages = f'UPDATE messages SET deleted = True WHERE chain_id IN {sql_chains_in_forum}'
     db.session.execute(sql_delete_messages, {'forum_id': forum_id})
-    db.session_execute
+    db.session.commit()
 
 
 def delete_message(message_id, writer_id):
@@ -136,8 +136,7 @@ def delete_chain(chain_id, creator_id):
     db.session.execute(sql, {'chain_id': chain_id, 'creator_id': creator_id})
     db.session.commit()
 
-    sql_messages_in_chain = '(SELECT id FROM messages WHERE chain_id = :chain_id)'
-    sql_delete_messages = f'UPDATE messages SET deleted = True WHERE id IN {sql_messages_in_chain}'
+    sql_delete_messages = f'UPDATE messages SET deleted = True WHERE chain_id = :chain_id'
     db.session.execute(sql_delete_messages, {'chain_id': chain_id})
     db.session.commit()
 
@@ -146,10 +145,15 @@ def search_messages_with_word(word, user_id):
     sql_forum_id = '(SELECT f.id FROM forums f, chains c WHERE f.id = c.forum_id AND c.id = m.chain_id)'
     sql_writer_name = '(SELECT u.username FROM users u WHERE u.id = m.writer_id)'
     sql = f'''SELECT m.id, m.chain_id, {sql_forum_id}, {sql_writer_name}, m.message, TO_CHAR(m.sent_at, \'HH24:MI, Mon dd yyyy\'), m.deleted 
-    FROM messages m 
-    WHERE m.deleted = False AND (m.message LIKE :word1 OR m.message LIKE :word2 OR m.message LIKE :word3)'''
+    FROM messages m
+    WHERE m.deleted = False 
+    AND (m.message LIKE :word1 OR m.message LIKE :word2 OR m.message LIKE :word3)
+    AND m.chain_id IN 
+    (SELECT c.id FROM chains c LEFT JOIN forums f ON f.id = c.forum_id WHERE f.is_secret = False OR f.id IN 
+    (SELECT forum_id FROM has_access WHERE user_id = :user_id))'''
+
     messages = db.session.execute(
-        sql, {'word1': word+'%', 'word2': '%'+word+'%', 'word3': '%'+word}).fetchall()
+        sql, {'word1': word+'%', 'word2': '%'+word+'%', 'word3': '%'+word, 'user_id': user_id}).fetchall()
     return messages
 
 
@@ -207,7 +211,8 @@ def has_user_unliked_message(message_id, liker_id):
 
 def is_user_chain_creator(chain_id, user_id):
     sql = 'SELECT * FROM chains WHERE id = :chain_id AND creator_id = :user_id'
-    access = db.session.execute(sql, {'chain_id': chain_id, 'user_id': user_id}).fetchall()
+    access = db.session.execute(
+        sql, {'chain_id': chain_id, 'user_id': user_id}).fetchall()
     if len(access) == 0:
         return False
     else:
@@ -216,7 +221,8 @@ def is_user_chain_creator(chain_id, user_id):
 
 def is_user_message_writer(message_id, user_id):
     sql = 'SELECT * FROM messages WHERE id = :message_id AND writer_id = :user_id'
-    access = db.session.execute(sql, {'message_id': message_id, 'user_id': user_id}).fetchall()
+    access = db.session.execute(
+        sql, {'message_id': message_id, 'user_id': user_id}).fetchall()
     if len(access) == 0:
         return False
     else:
