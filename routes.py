@@ -1,8 +1,10 @@
-from crypt import methods
+import string
 from app import app
 from flask import render_template, request, redirect
 import users
 import forums as fr
+import chains as ch
+import messages as ms
 
 
 @app.route('/')
@@ -19,10 +21,14 @@ def reqister():
 
     if request.method == 'POST':
         username = request.form['username']
-        if len(username) > 25:
-            return render_template('error.html', message='The username is too long')
-        if len(username) < 8:
-            return render_template('error.html', message='Username is too short')
+        if len(username) > 20:
+            return render_template('error.html', message='The username is too long, it should be 4-20 characters long')
+        if len(username) < 4:
+            return render_template('error.html', message='Username is too short, it should be 4-20 characters long')
+        characters = string.ascii_letters + string.digits + 'äåöÄÅÖ'
+        for i in username:
+            if i not in characters:
+                return render_template('error.html', message='Username must have only letters and numbers in it')
 
         password1 = request.form['password1']
         password2 = request.form['password2']
@@ -66,7 +72,7 @@ def show_forum(forum_id):
         return render_template('error.html', message='This forum is deleted')
 
     if fr.has_user_forum_access(forum_id, users.user_id()):
-        chains = fr.get_chains_info_in_forum(forum_id)
+        chains = ch.get_chains_info_in_forum(forum_id)
         name = fr.get_forum_name(forum_id)[0]
         return render_template('forum.html', id=forum_id, chains=chains, name=name)
     else:
@@ -75,12 +81,12 @@ def show_forum(forum_id):
 
 @app.route('/forum/<int:forum_id>/<int:chain_id>')
 def show_chain(forum_id, chain_id):
-    if fr.is_chain_deleted(chain_id):
+    if ch.is_chain_deleted(chain_id):
         return render_template('error.html', message='This chain is deleted')
 
     if fr.has_user_forum_access(forum_id, users.user_id()):
-        messages = fr.get_messages_info(chain_id)
-        chain_info = fr.get_chains_info(chain_id)[0]
+        messages = ms.get_messages_info(chain_id)
+        chain_info = ch.get_chains_info(chain_id)[0]
         return render_template('chain.html', id=chain_id, forum_id=forum_id, messages=messages, chain_info=chain_info)
 
     else:
@@ -118,7 +124,7 @@ def add_new_chain(forum_id):
             if len(message) > 10000:
                 return render_template("error.html", message="The message is too long")
 
-            chain_id = fr.add_new_chain(
+            chain_id = ch.add_new_chain(
                 headline, message, users.user_id(), forum_id)
 
             return redirect(f'/forum/{forum_id}/{chain_id}')
@@ -134,7 +140,7 @@ def new_message():
     chain_id = request.form['chain_id']
     forum_id = request.form['forum_id']
 
-    if fr.is_chain_deleted(chain_id):
+    if ch.is_chain_deleted(chain_id):
         return render_template('error.html', message='This chain is deleted')
 
     if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
@@ -145,7 +151,7 @@ def new_message():
         if len(message) > 10000:
             return render_template("error.html", message="The message is too long")
 
-        fr.add_new_message(message, users.user_id(), chain_id)
+        ms.add_new_message(message, users.user_id(), chain_id)
 
         return redirect(f'/forum/{forum_id}/{chain_id}')
 
@@ -175,6 +181,7 @@ def new_forum():
 
     elif access_choice == 'private':
         forum_id = fr.add_new_forum(name, creator_id, True)
+
         allowed_users = request.form.getlist('allowed_user')
         for user_id in allowed_users:
             fr.add_access_to_secret_forum(forum_id, user_id)
@@ -189,11 +196,11 @@ def delete_message():
     forum_id = request.form['forum_id']
     message_id = request.form['message_id']
 
-    if fr.is_message_deleted(message_id):
+    if ms.is_message_deleted(message_id):
         return render_template('error.html', message='This message is already deleted')
 
-    if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_message_writer(message_id, users.user_id()):
-        fr.delete_message(message_id, users.user_id())
+    if fr.has_user_forum_access(forum_id, users.user_id()) and ms.is_user_message_writer(message_id, users.user_id()):
+        ms.delete_message(message_id, users.user_id())
 
         chain_id = request.form['chain_id']
         return redirect(f'/forum/{forum_id}/{chain_id}')
@@ -205,10 +212,10 @@ def delete_message():
 @app.route('/forum/<int:forum_id>/<int:chain_id>/<int:message_id>', methods=['get', 'post'])
 def edit_message(forum_id, chain_id, message_id):
     if request.method == 'GET':
-        if fr.is_message_deleted(message_id):
+        if ms.is_message_deleted(message_id):
             return render_template('error.html', message='This message is deleted')
 
-        if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_message_writer(message_id, users.user_id()):
+        if fr.has_user_forum_access(forum_id, users.user_id()) and ms.is_user_message_writer(message_id, users.user_id()):
             return render_template('edit_message.html', forum_id=forum_id, chain_id=chain_id, message_id=message_id)
         else:
             return render_template("error.html", message="No access")
@@ -216,10 +223,10 @@ def edit_message(forum_id, chain_id, message_id):
     if request.method == 'POST':
         users.check_csrf()
 
-        if fr.is_message_deleted(message_id):
+        if ms.is_message_deleted(message_id):
             return render_template('error.html', message='This message is deleted')
 
-        if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_message_writer(message_id, users.user_id()):
+        if fr.has_user_forum_access(forum_id, users.user_id()) and ms.is_user_message_writer(message_id, users.user_id()):
             message = request.form['message']
             if message == "":
                 return render_template("error.html", message="You have to write a message")
@@ -227,7 +234,7 @@ def edit_message(forum_id, chain_id, message_id):
                 return render_template("error.html", message="The message is too long")
             writer_id = users.user_id()
 
-            fr.edit_message(message_id, message, writer_id)
+            ms.edit_message(message_id, message, writer_id)
 
             return redirect(f'/forum/{forum_id}/{chain_id}')
 
@@ -238,10 +245,10 @@ def edit_message(forum_id, chain_id, message_id):
 @app.route('/forum/<int:forum_id>/<int:chain_id>/edit_headline', methods=['get', 'post'])
 def edit_headline(forum_id, chain_id):
     if request.method == 'GET':
-        if fr.is_chain_deleted(chain_id):
+        if ch.is_chain_deleted(chain_id):
             return render_template('error.html', message='This chain is deleted')
 
-        if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_chain_creator(chain_id, users.user_id()):
+        if fr.has_user_forum_access(forum_id, users.user_id()) and ch.is_user_chain_creator(chain_id, users.user_id()):
             return render_template('edit_headline.html', forum_id=forum_id, chain_id=chain_id)
 
         else:
@@ -250,10 +257,10 @@ def edit_headline(forum_id, chain_id):
     if request.method == 'POST':
         users.check_csrf()
 
-        if fr.is_chain_deleted(chain_id):
+        if ch.is_chain_deleted(chain_id):
             return render_template('error.html', message='This chain is deleted')
 
-        if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_chain_creator(chain_id, users.user_id()):
+        if fr.has_user_forum_access(forum_id, users.user_id()) and ch.is_user_chain_creator(chain_id, users.user_id()):
             headline = request.form['headline']
             if headline == "":
                 return render_template("error.html", message="You have to write something to be the headline")
@@ -261,7 +268,7 @@ def edit_headline(forum_id, chain_id):
                 return render_template("error.html", message="Headline must be between 2-15 characters")
             writer_id = users.user_id()
 
-            fr.edit_chain_headline(chain_id, headline, writer_id)
+            ch.edit_chain_headline(chain_id, headline, writer_id)
 
             return redirect(f'/forum/{forum_id}/{chain_id}')
 
@@ -276,11 +283,11 @@ def delete_chain():
     forum_id = request.form['forum_id']
     chain_id = request.form['chain_id']
 
-    if fr.is_chain_deleted(chain_id):
+    if ch.is_chain_deleted(chain_id):
         return render_template('error.html', message='This chain is already deleted')
 
-    if fr.has_user_forum_access(forum_id, users.user_id()) and fr.is_user_chain_creator(chain_id, users.user_id()):
-        fr.delete_chain(chain_id, users.user_id())
+    if fr.has_user_forum_access(forum_id, users.user_id()) and ch.is_user_chain_creator(chain_id, users.user_id()):
+        ch.delete_chain(chain_id, users.user_id())
 
         return redirect(f'/forum/{forum_id}')
 
@@ -316,7 +323,7 @@ def search_messages():
         word = request.form['word']
         if word == "":
             return render_template("error.html", message="You have to input a word or letter")
-        messages = fr.search_messages_with_word(word, users.user_id())
+        messages = ms.search_messages_with_word(word, users.user_id())
         is_words = True
 
         return render_template('search.html', messages=messages, is_words=is_words)
@@ -329,16 +336,16 @@ def like_message():
     forum_id = request.form['forum_id']
     message_id = request.form['message_id']
 
-    if fr.is_message_deleted(message_id):
+    if ms.is_message_deleted(message_id):
         return render_template('error.html', message='This message is deleted')
 
     if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
         liker_id = users.user_id()
 
-        if not fr.has_user_liked_message(message_id, liker_id):
+        if not ms.has_user_liked_message(message_id, liker_id):
             return render_template("error.html", message="You can't like the same message twice")
         else:
-            fr.like_message(message_id, liker_id)
+            ms.like_message(message_id, liker_id)
 
             chain_id = request.form['chain_id']
             return redirect(f'/forum/{forum_id}/{chain_id}')
@@ -354,16 +361,16 @@ def unlike_message():
     forum_id = request.form['forum_id']
     message_id = request.form['message_id']
 
-    if fr.is_message_deleted(message_id):
+    if ms.is_message_deleted(message_id):
         return render_template('error.html', message='This message is deleted')
 
     if fr.has_user_forum_access(forum_id, users.user_id()) and users.user_id() > 0:
         liker_id = users.user_id()
-        
-        if not fr.has_user_unliked_message(message_id, liker_id):
+
+        if not ms.has_user_unliked_message(message_id, liker_id):
             return render_template("error.html", message="You can't unlike the same message twice")
         else:
-            fr.unlike_message(message_id, liker_id)
+            ms.unlike_message(message_id, liker_id)
 
             chain_id = request.form['chain_id']
             return redirect(f'/forum/{forum_id}/{chain_id}')
