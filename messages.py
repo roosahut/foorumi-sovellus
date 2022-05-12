@@ -67,7 +67,7 @@ def unlike_message(message_id, liker_id):
     has_user_liked = db.session.execute(
         sql, {'message_id': message_id, 'liker_id': liker_id}).fetchall()
     if len(has_user_liked) == 0:
-        sql = 'INSERT INTO likes (message_id, liker_id, is_unlike) VALUES (:message_id, :liker_id, False)'
+        sql = 'INSERT INTO likes (message_id, liker_id, is_unlike) VALUES (:message_id, :liker_id, True)'
         db.session.execute(
             sql, {'message_id': message_id, 'liker_id': liker_id})
         db.session.commit()
