@@ -8,14 +8,17 @@ CREATE TABLE users (
 CREATE TABLE forums (
     id SERIAL PRIMARY KEY,
     creator_id INTEGER REFERENCES users,
-    name TEXT
+    name TEXT,
+    deleted BOOLEAN,
+    is_secret BOOLEAN
 );
 
 CREATE TABLE chains (
     id SERIAL PRIMARY KEY,
     creator_id INTEGER REFERENCES users,
     forum_id INTEGER REFERENCES forums,
-    headline TEXT
+    headline TEXT,
+    deleted BOOLEAN
 );
 
 CREATE TABLE messages (
@@ -23,7 +26,8 @@ CREATE TABLE messages (
     writer_id INTEGER REFERENCES users,
     chain_id INTEGER REFERENCES chains,
     message TEXT,
-    sent_at TIMESTAMPTZ DEFAULT Now()
+    sent_at TIMESTAMPTZ DEFAULT Now(),
+    deleted BOOLEAN
 );
 
 CREATE TABLE likes (
@@ -38,8 +42,3 @@ CREATE TABLE has_access (
     forum_id INTEGER REFERENCES forums,
     user_id INTEGER REFERENCES users
 );
-
-ALTER TABLE chains ADD deleted BOOLEAN;
-ALTER TABLE forums ADD deleted BOOLEAN;
-ALTER TABLE messages ADD deleted BOOLEAN;
-ALTER TABLE forums ADD is_secret BOOLEAN;
