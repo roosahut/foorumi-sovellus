@@ -4,6 +4,7 @@
 ~~Sovelluksen saa käyttöön [Herokussa](https://tsoha-chatforum.herokuapp.com/).~~
 
 Sovellus päivitetty toimimaan fly.iossa [täällä](https://tsoha-foorumi.fly.dev/)
+(jostain syystä sovellus näyttää välillä ensimmäistä kertaa avatessa 500 error, mutta toimii kyllä kun päivittää sivun)
 
 ## Sovelluksen tilanne
 Sovelluksesta löytyy tällä hetkellä kaikki alla kuvatut ominaisuudet.
